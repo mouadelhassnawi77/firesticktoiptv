@@ -1,0 +1,86 @@
+
+/* ---------- Analytics (Google Analytics 4) ---------- */
+.live-card {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+  padding: 0.8rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+.live-card strong {
+  font-size: 1.4rem;
+  font-weight: 800;
+  font-stretch: 80%;
+  margin-right: 0.25rem;
+}
+.live-card .sub {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+}
+.live-dot {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #1faa53;
+  box-shadow: 0 0 0 4px rgba(31, 170, 83, 0.18);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .live-dot {
+    animation: live-pulse 2s ease-in-out infinite;
+  }
+}
+@keyframes live-pulse {
+  50% {
+    box-shadow: 0 0 0 8px rgba(31, 170, 83, 0.06);
+  }
+}
+.funnel {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+.funnel li {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--r-sm);
+  background: var(--paper);
+}
+.funnel li:nth-child(2) {
+  margin-inline: 0.6rem;
+}
+.funnel li:nth-child(3) {
+  margin-inline: 1.2rem;
+  background: var(--block-now);
+}
+.split-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--signal);
+  overflow: hidden;
+}
+.split-bar span {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+}
+.setup ol {
+  padding-left: 1.3rem;
+  display: grid;
+  gap: 0.6rem;
+}
+.setup code {
+  background: var(--paper);
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+}
+.orders.mini {
+  min-width: 0;
+}

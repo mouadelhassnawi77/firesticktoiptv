@@ -1,0 +1,40 @@
+
+/* ---------- Cookie-Hinweis (nur aktiv, wenn Google Analytics eingerichtet ist) ---------- */
+.consent {
+  position: fixed;
+  z-index: 60;
+  left: 1rem;
+  right: 1rem;
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  max-width: 34rem;
+  padding: 1.1rem 1.2rem;
+  background: var(--surface);
+  border: 2px solid var(--ink);
+  border-radius: var(--r-md);
+  box-shadow: 6px 6px 0 var(--ink);
+  font-size: 0.9375rem;
+}
+.consent p {
+  margin: 0 0 0.75rem;
+}
+.consent-title {
+  font-weight: 800;
+  font-size: 1.0625rem;
+}
+.consent-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.link-button:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
