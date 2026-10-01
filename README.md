@@ -79,20 +79,27 @@ Lost your phone? Change `ADMIN_PASSWORD` in Vercel and redeploy. That resets 2FA
 
 Locally: run any Postgres and put `DATABASE_URL`, `ADMIN_USERNAME` and `ADMIN_PASSWORD` in `.env.local`.
 
-## Google Analytics (`/admin/analytics`, like MonsterInsights)
+## Analytics (`/admin/analytics`, Google Analytics 4 + your orders)
 
-**Tracking** (public site): set `NEXT_PUBLIC_GA_ID` (G-…). GA4 is loaded **only after opt-in** in the cookie banner
-(DSGVO / § 25 TDDDG). "Cookie-Einstellungen" in the footer lets visitors withdraw; GA cookies are deleted then.
-Without `NEXT_PUBLIC_GA_ID` there is no banner, no cookies, no tracking. Events sent: `begin_checkout`
-(order popup opened) and `generate_lead` (order sent) with value in EUR.
+**Tracking** (public site): set `NEXT_PUBLIC_GA_ID` (G-…). US mode is opt-out: GA loads unless the visitor declines
+via "Cookie settings" in the footer (GA cookies are deleted then). Without `NEXT_PUBLIC_GA_ID` there is no tracking.
+Events sent: `begin_checkout` (order form opened) and `generate_lead` (order sent) with value in USD.
 
-**Reporting** (admin): realtime users, sessions, users, new users, pageviews, session duration, engagement and
-bounce rate (with change vs previous period), chart per hour/day/month, order funnel, traffic channels, devices,
-new vs returning, top pages, countries, sources, landing pages. Periods: today, 7/30/90 days, 12 months.
+**Reporting** (admin):
 
-Setup: Google Cloud project → enable *Google Analytics Data API* → service account → JSON key.
-GA4 Admin → Property access management → add the service account as **Viewer**. Then in Vercel:
-`GA_PROPERTY_ID` (numeric), `GA_CLIENT_EMAIL`, `GA_PRIVATE_KEY` (the `private_key` from the JSON) and redeploy.
+- **Live panel**, refreshes every 30 seconds: visitors in the last 30 minutes, visitors per minute, pages being viewed,
+  countries, devices, order forms opened and sent, plus orders from the database (last 30 min, today, newest orders)
+- **From visitor to revenue:** visitors and order forms (GA) next to real orders, paid orders and revenue (database),
+  with revenue per visitor
+- **KPIs** with change vs the previous period: visitors, new visitors, sessions, pageviews, engagement time, engagement rate
+- **Conversion by channel, source/medium and landing page:** which traffic and which pages bring orders
+- Sessions/pageviews chart, most viewed pages with engagement time, US states, countries, devices, operating systems,
+  new vs returning. Periods: today, 7, 30, 90 days, 12 months
+
+**Setup:** Google Cloud project → enable *Google Analytics Data API* → service account → Keys → Add key → JSON.
+GA4 Admin → Property access management → add the service account email as **Viewer**. Then in Vercel (Production):
+`GA_PROPERTY_ID` (numeric) and `GA_SERVICE_ACCOUNT_JSON` (the whole JSON file), and redeploy.
+`GA_CLIENT_EMAIL` + `GA_PRIVATE_KEY` still work instead of the JSON. The admin page shows what is missing.
 
 ## Deploy: GitHub → Vercel
 

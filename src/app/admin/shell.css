@@ -607,3 +607,9 @@
     transition: none !important;
   }
 }
+
+/* Grid items may shrink below their content, so wide tables scroll inside their panel instead of widening the page */
+.admin-grid > *,
+.kpis > * {
+  min-width: 0;
+}

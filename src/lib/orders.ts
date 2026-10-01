@@ -1,6 +1,6 @@
 import "server-only";
 import { query } from "./db";
-import { devices, getProduct, isFree, paymentMethods } from "./shop";
+import { devices, getProduct, isFree, paymentMethods, trial } from "./shop";
 import { market } from "./site";
 
 /**
@@ -471,5 +471,78 @@ export async function getCustomerSummary() {
     paying: Number(row.paying),
     repeat: Number(row.repeat),
     ltv: Number(row.ltv) / 100,
+  };
+}
+
+/* ---------- Sales for the Analytics page ---------- */
+
+const TRIAL_ID = trial.id;
+
+/**
+ * Orders and revenue for the last `days` days ending today (market time zone), plus the same length before it.
+ * Matches the Google Analytics periods (today, 7, 30, 90, 365 days), so visitors and sales line up.
+ */
+export async function getSalesWindow(days: number) {
+  await expireOldOrders();
+  const [r] = await query<Record<string, string>>(
+    `WITH b AS (SELECT date_trunc('day', now() AT TIME ZONE '${TZ}') - make_interval(days => $1::int - 1) AS from_ts),
+          p AS (SELECT from_ts, from_ts + make_interval(days => $1::int) AS to_ts, from_ts - make_interval(days => $1::int) AS prev_ts FROM b)
+     SELECT
+       COUNT(*) FILTER (WHERE ${localCreated} >= p.from_ts AND ${localCreated} < p.to_ts) AS orders,
+       COUNT(*) FILTER (WHERE ${localCreated} >= p.from_ts AND ${localCreated} < p.to_ts AND o.product_id = $3) AS trials,
+       COUNT(*) FILTER (WHERE o.status = ANY($2) AND ${localPaid} >= p.from_ts AND ${localPaid} < p.to_ts) AS paid,
+       COALESCE(SUM(o.price_cents) FILTER (WHERE o.status = ANY($2) AND ${localPaid} >= p.from_ts AND ${localPaid} < p.to_ts), 0) AS revenue,
+       COUNT(*) FILTER (WHERE ${localCreated} >= p.prev_ts AND ${localCreated} < p.from_ts) AS prev_orders,
+       COUNT(*) FILTER (WHERE o.status = ANY($2) AND ${localPaid} >= p.prev_ts AND ${localPaid} < p.from_ts) AS prev_paid,
+       COALESCE(SUM(o.price_cents) FILTER (WHERE o.status = ANY($2) AND ${localPaid} >= p.prev_ts AND ${localPaid} < p.from_ts), 0) AS prev_revenue
+     FROM p LEFT JOIN orders o ON true
+     GROUP BY p.from_ts`,
+    [days, PAID, TRIAL_ID]
+  );
+  return {
+    orders: Number(r.orders),
+    trials: Number(r.trials),
+    paid: Number(r.paid),
+    revenue: Number(r.revenue) / 100,
+    prevOrders: Number(r.prev_orders),
+    prevPaid: Number(r.prev_paid),
+    prevRevenue: Number(r.prev_revenue) / 100,
+  };
+}
+
+export type LiveSales = {
+  last30: number;
+  todayOrders: number;
+  todayRevenue: number;
+  latest: { id: string; at: string; plan: string; device: string; status: string; statusLabel: string; price: number }[];
+};
+
+/** Orders right now: last 30 minutes, today, and the newest five */
+export async function getLiveSales(): Promise<LiveSales> {
+  const [r] = await query<{ last30: string; today_orders: string; today_revenue: string }>(
+    `WITH t AS (SELECT date_trunc('day', now() AT TIME ZONE '${TZ}') AS from_ts)
+     SELECT COUNT(*) FILTER (WHERE o.created_at > now() - interval '30 minutes') AS last30,
+            COUNT(*) FILTER (WHERE ${localCreated} >= t.from_ts) AS today_orders,
+            COALESCE(SUM(o.price_cents) FILTER (WHERE o.status = ANY($1) AND ${localPaid} >= t.from_ts), 0) AS today_revenue
+     FROM t LEFT JOIN orders o ON true
+     GROUP BY t.from_ts`,
+    [PAID]
+  );
+  const latest = await query<{ id: string; created_at: Date; product_name: string; device: string; status: string; price_cents: number }>(
+    `SELECT id, created_at, product_name, device, status, price_cents FROM orders ORDER BY created_at DESC LIMIT 5`
+  );
+  return {
+    last30: Number(r.last30),
+    todayOrders: Number(r.today_orders),
+    todayRevenue: Number(r.today_revenue) / 100,
+    latest: latest.map((o) => ({
+      id: o.id,
+      at: new Date(o.created_at).toISOString(),
+      plan: o.product_name,
+      device: o.device,
+      status: o.status,
+      statusLabel: statusLabel(o.status),
+      price: o.price_cents / 100,
+    })),
   };
 }
