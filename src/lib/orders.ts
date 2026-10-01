@@ -381,3 +381,95 @@ export async function deleteOrder(id: string) {
 export async function allOrdersForExport() {
   return query<OrderRow>(`SELECT * FROM orders ORDER BY created_at DESC`);
 }
+
+/* ---------- Customers: one row per email address ---------- */
+
+export type CustomerRow = {
+  email: string;
+  name: string;
+  phone: string | null;
+  orders: number;
+  paid_orders: number;
+  spent_cents: number;
+  first_order: Date;
+  last_order: Date;
+  last_order_id: string;
+  active_until: Date | null;
+  devices: string[];
+};
+
+export const CUSTOMER_FILTERS = [
+  { id: "all", label: "All" },
+  { id: "active", label: "Active subscription" },
+  { id: "expired", label: "Expired, win back" },
+  { id: "leads", label: "Never paid" },
+] as const;
+
+export async function listCustomers({
+  q,
+  filter,
+  page,
+  pageSize = PAGE_SIZE,
+}: {
+  q?: string;
+  filter?: string;
+  page: number;
+  pageSize?: number;
+}) {
+  await expireOldOrders();
+  const params: unknown[] = [PAID];
+  const having: string[] = [];
+  let where = "";
+  if (q) {
+    params.push(`%${q.toLowerCase()}%`);
+    where = `WHERE lower(name) LIKE $2 OR lower(email) LIKE $2 OR COALESCE(phone, '') LIKE $2`;
+  }
+  if (filter === "active") having.push(`MAX(expires_at) FILTER (WHERE status = 'aktiviert') > now()`);
+  if (filter === "expired")
+    having.push(
+      `COUNT(*) FILTER (WHERE status = 'aktiviert') = 0 AND COUNT(*) FILTER (WHERE status = 'abgelaufen') > 0`
+    );
+  if (filter === "leads") having.push(`COUNT(*) FILTER (WHERE status = ANY($1)) = 0`);
+  const havingSql = having.length ? `HAVING ${having.join(" AND ")}` : "";
+  const base = `
+    SELECT lower(email) AS email,
+           (array_agg(name ORDER BY created_at DESC))[1] AS name,
+           (array_agg(phone ORDER BY created_at DESC) FILTER (WHERE phone IS NOT NULL))[1] AS phone,
+           COUNT(*)::int AS orders,
+           (COUNT(*) FILTER (WHERE status = ANY($1)))::int AS paid_orders,
+           COALESCE(SUM(price_cents) FILTER (WHERE status = ANY($1)), 0)::int AS spent_cents,
+           MIN(created_at) AS first_order,
+           MAX(created_at) AS last_order,
+           (array_agg(id ORDER BY created_at DESC))[1] AS last_order_id,
+           MAX(expires_at) FILTER (WHERE status = 'aktiviert') AS active_until,
+           array_agg(DISTINCT device) AS devices
+    FROM orders ${where}
+    GROUP BY lower(email) ${havingSql}`;
+  const [{ total }] = await query<{ total: string }>(`SELECT COUNT(*) AS total FROM (${base}) t`, params);
+  params.push(pageSize, (page - 1) * pageSize);
+  const rows = await query<CustomerRow>(
+    `${base} ORDER BY spent_cents DESC, last_order DESC LIMIT $${params.length - 1} OFFSET $${params.length}`,
+    params
+  );
+  return { rows, total: Number(total) };
+}
+
+export async function getCustomerSummary() {
+  const [row] = await query<{ customers: string; paying: string; repeat: string; ltv: string }>(
+    `SELECT COUNT(*) AS customers,
+            COUNT(*) FILTER (WHERE paid > 0) AS paying,
+            COUNT(*) FILTER (WHERE paid > 1) AS repeat,
+            COALESCE(AVG(spent) FILTER (WHERE paid > 0), 0) AS ltv
+     FROM (SELECT lower(email) AS e,
+                  COUNT(*) FILTER (WHERE status = ANY($1)) AS paid,
+                  SUM(price_cents) FILTER (WHERE status = ANY($1)) AS spent
+           FROM orders GROUP BY lower(email)) c`,
+    [PAID]
+  );
+  return {
+    customers: Number(row.customers),
+    paying: Number(row.paying),
+    repeat: Number(row.repeat),
+    ltv: Number(row.ltv) / 100,
+  };
+}

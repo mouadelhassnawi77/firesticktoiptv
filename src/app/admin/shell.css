@@ -1,0 +1,609 @@
+/* =========================================================
+   Admin console: sidebar shell, security page and sign-in.
+   Same TV-guide language as the site: navy ink, cool paper,
+   signal yellow for the thing that needs you now, red only for risk.
+   Loaded after admin.css and analytics.css.
+   ========================================================= */
+.admin {
+  --ok: #1c7a3d;
+  --warn-bg: #fff6d6;
+  --side-ink: #b7c3d3;
+}
+.page-sub {
+  margin: 0.25rem 0 0;
+  color: var(--ink-soft);
+}
+.panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.75rem;
+}
+.panel-head h2 {
+  margin: 0;
+}
+.small {
+  font-size: 0.8125rem;
+}
+.admin .btn-sm {
+  min-height: 34px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8125rem;
+  border-width: 1px;
+}
+.admin .btn-danger {
+  color: #a51d2d;
+  border-color: #e7b3ba;
+}
+.admin .btn-danger:hover {
+  background: #fbe0e3;
+}
+.admin .btn[disabled] {
+  opacity: 0.65;
+  cursor: progress;
+}
+.notice.is-ok {
+  background: #e3f5e9;
+  border-color: var(--ok);
+}
+
+/* ---------- Shell ---------- */
+.shell {
+  display: grid;
+  grid-template-columns: 236px minmax(0, 1fr);
+  min-height: 100vh;
+  /* keeps the navy column running down long pages */
+  background: linear-gradient(90deg, var(--ink) 236px, transparent 236px);
+}
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.1rem 0.75rem;
+  background: var(--ink);
+  color: var(--side-ink);
+}
+.side-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.2rem 0.5rem;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 800;
+  font-stretch: 85%;
+  font-size: 1.05rem;
+  line-height: 1.15;
+}
+.side-brand small {
+  display: inline-block;
+  margin-top: 0.2rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: var(--r-sm);
+  background: var(--signal);
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-stretch: 100%;
+}
+.side-brand span {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.side-nav {
+  display: grid;
+  gap: 2px;
+}
+.side-nav a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 42px;
+  padding: 0.5rem 0.7rem;
+  border-radius: var(--r-sm);
+  color: var(--side-ink);
+  text-decoration: none;
+  font-weight: 600;
+}
+.side-nav a:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+/* Active item reads like the "now" slot in a TV guide: a yellow marker on the left edge */
+.side-nav a[aria-current="page"] {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+.side-nav a[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  left: -0.75rem;
+  top: 6px;
+  bottom: 6px;
+  width: 4px;
+  border-radius: 0 3px 3px 0;
+  background: var(--signal);
+}
+.nav-badge {
+  margin-left: auto;
+  min-width: 1.45rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--signal);
+  color: var(--ink);
+  font-style: normal;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.45rem;
+}
+.nav-badge.is-warn {
+  background: var(--live);
+  color: #fff;
+}
+.side-foot {
+  margin-top: auto;
+  display: grid;
+  gap: 0.1rem;
+}
+.side-link {
+  padding: 0.4rem 0.7rem;
+  border-radius: var(--r-sm);
+  color: var(--side-ink);
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+.side-link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.07);
+}
+.side-user {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+  padding: 0.75rem 0.5rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+.avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--signal);
+  color: var(--ink);
+  font-weight: 800;
+}
+.side-user-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #fff;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.side-user-name small {
+  display: block;
+  color: var(--side-ink);
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+.signout {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--side-ink);
+  cursor: pointer;
+}
+.signout:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+.sidebar :focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+.shell-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 60px;
+  padding: 0.6rem clamp(1rem, 3vw, 2rem);
+  background: rgba(241, 243, 246, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.top-search {
+  position: relative;
+  flex: 1;
+  max-width: 32rem;
+}
+.top-search svg {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-soft);
+}
+.top-search input {
+  width: 100%;
+  min-height: 40px;
+  padding: 0.4rem 0.8rem 0.4rem 2.2rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.875rem;
+}
+.top-search input:focus {
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px var(--signal);
+}
+.top-warn,
+.top-pill {
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.top-warn {
+  margin-left: auto;
+  background: #fbe0e3;
+  color: #a51d2d;
+}
+.top-pill {
+  background: var(--signal);
+  color: var(--ink);
+}
+.top-search + .top-pill {
+  margin-left: auto;
+}
+.shell .admin-main {
+  width: 100%;
+  max-width: 1320px;
+  padding: 1.75rem clamp(1rem, 3vw, 2rem) 3rem;
+}
+
+/* ---------- Security page ---------- */
+.score {
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.8125rem;
+}
+.score.is-ok {
+  background: #d9f2e1;
+  color: var(--ok);
+}
+.score.is-warn {
+  background: var(--warn-bg);
+  color: #7a5b00;
+  border: 1px solid var(--signal-deep);
+}
+.sec-block {
+  margin-bottom: 1rem;
+}
+.checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+@media (min-width: 900px) {
+  .checklist {
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  }
+}
+@media (min-width: 1360px) {
+  .checklist {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+.checklist li {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+}
+.checklist .sub {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+}
+.check-ico {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #d9f2e1;
+  color: var(--ok);
+  font-weight: 800;
+  font-size: 0.8rem;
+}
+.checklist li.is-warn {
+  border-color: var(--signal-deep);
+  background: var(--warn-bg);
+}
+.checklist li.is-warn .check-ico {
+  background: var(--signal);
+  color: var(--ink);
+}
+.setup-steps {
+  margin: 0 0 1rem;
+  padding-left: 1.2rem;
+}
+.setup-steps li + li {
+  margin-top: 0.3rem;
+}
+.twofa-setup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.qr {
+  flex: none;
+  width: 180px;
+  height: 180px;
+  padding: 6px;
+  border: 2px solid var(--ink);
+  border-radius: var(--r-sm);
+  background: #fff;
+}
+.qr svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.secret {
+  display: inline-block;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--r-sm);
+  background: var(--block);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  word-break: break-all;
+}
+.twofa-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.twofa-form label {
+  flex-basis: 100%;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+.twofa-form input {
+  width: 9.5rem;
+  min-height: 48px;
+  padding: 0.4rem 0.7rem;
+  border: 2px solid var(--line);
+  border-radius: var(--r-sm);
+  font: inherit;
+  font-size: 1.1rem;
+  letter-spacing: 0.15em;
+  text-align: center;
+}
+.twofa-form input:focus {
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px var(--signal);
+}
+.twofa-form .form-error {
+  flex-basis: 100%;
+  margin: 0;
+}
+.simple-list .sub {
+  display: block;
+}
+.ev {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.ev::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink-soft);
+}
+.ev-ok::before {
+  background: var(--ok);
+}
+.ev-bad {
+  color: #a51d2d;
+}
+.ev-bad::before {
+  background: var(--live);
+}
+
+/* ---------- Sign-in ----------
+   The one loud moment: a navy page ruled like a programme grid,
+   with the sign-in card sitting on it as the highlighted "now" block. */
+.login {
+  background-color: var(--ink);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 100% 56px, 160px 100%;
+}
+.login-card {
+  width: min(25rem, 100%);
+  border: 2px solid var(--ink);
+  box-shadow: 8px 8px 0 var(--signal);
+  padding: 2rem;
+}
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+.login-brand strong {
+  display: block;
+  font-stretch: 85%;
+  font-size: 1.05rem;
+}
+.login-brand span {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+}
+.login-card h1 {
+  font-size: 1.75rem;
+  margin-bottom: 1.1rem;
+}
+.pw-field {
+  position: relative;
+}
+.pw-field input {
+  padding-right: 4.4rem;
+}
+.pw-field button {
+  position: absolute;
+  right: 0.4rem;
+  top: 6px;
+  height: 36px;
+  padding: 0 0.65rem;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: var(--block);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.pw-field button:focus-visible {
+  outline: 2px solid var(--ink);
+}
+.login-card #code {
+  letter-spacing: 0.2em;
+  text-align: center;
+  font-size: 1.15rem;
+}
+.login-card .form-error {
+  margin: -0.4rem 0 0.9rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--r-sm);
+  background: #fbe0e3;
+  font-size: 0.875rem;
+}
+.login-foot {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 1.25rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+}
+
+/* ---------- Mobile: the sidebar becomes a top bar with a scrolling nav ---------- */
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: minmax(0, 1fr);
+    background: none;
+  }
+  .sidebar {
+    position: static;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.75rem;
+  }
+  .side-nav {
+    order: 3;
+    flex-basis: 100%;
+    display: flex;
+    gap: 0.25rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .side-nav a {
+    flex: none;
+    min-height: 40px;
+    padding: 0.4rem 0.65rem;
+  }
+  .side-nav a[aria-current="page"]::before {
+    left: 8px;
+    right: 8px;
+    top: auto;
+    bottom: 0;
+    width: auto;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+  }
+  .side-foot {
+    margin: 0 0 0 auto;
+    display: flex;
+    align-items: center;
+  }
+  .side-link,
+  .side-user-name {
+    display: none;
+  }
+  .side-user {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .topbar {
+    position: static;
+    flex-wrap: wrap;
+  }
+  .top-search {
+    flex-basis: 100%;
+    max-width: none;
+  }
+  .top-warn,
+  .top-search + .top-pill {
+    margin-left: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin * {
+    transition: none !important;
+  }
+}

@@ -23,6 +23,14 @@ import OrdersTable from "@/components/admin/OrdersTable";
 import RevenueChart from "@/components/admin/RevenueChart";
 import BarList from "@/components/admin/BarList";
 import WaIcon from "@/components/admin/WaIcon";
+import { market, site } from "@/lib/site";
+
+function greeting() {
+  const h = Number(
+    new Intl.DateTimeFormat("en-US", { hour: "numeric", hourCycle: "h23", timeZone: market.timeZone }).format(new Date())
+  );
+  return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+}
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -53,7 +61,12 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
   return (
     <>
       <div className="admin-head">
-        <h1>Dashboard</h1>
+        <div>
+          <h1>Dashboard</h1>
+          <p className="page-sub">
+            {greeting()}. Here is how {site.name} is doing.
+          </p>
+        </div>
         <nav className="tabs is-period" aria-label="Period">
           {PERIODS.map((p) => (
             <Link key={p.id} href={href({ period: p.id })} aria-current={p.id === a.period.id ? "page" : undefined}>
@@ -70,7 +83,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
           <p className="kpi-note">
             {a.revenueChange === null
               ? a.revenue > 0
-                ? "Previous period: €0"
+                ? `Previous period: ${fmtMoney(0)}`
                 : "No revenue yet"
               : `${pct(a.revenueChange)} vs previous period`}
           </p>

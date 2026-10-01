@@ -2,8 +2,8 @@ import "server-only";
 import { Pool, type QueryResultRow } from "pg";
 
 /**
- * Postgres-Verbindung (Neon auf Vercel, jede andere Postgres-Datenbank lokal).
- * Die Neon-Integration in Vercel setzt DATABASE_URL automatisch.
+ * Postgres connection (Neon on Vercel, any Postgres locally).
+ * The Neon integration in Vercel sets DATABASE_URL automatically.
  */
 const connectionString = process.env.DATABASE_URL ?? process.env.POSTGRES_URL;
 
@@ -12,7 +12,7 @@ export const dbConfigured = Boolean(connectionString);
 const globalForDb = globalThis as unknown as { pgPool?: Pool; schemaReady?: Promise<void> };
 
 function pool() {
-  if (!connectionString) throw new Error("DATABASE_URL fehlt");
+  if (!connectionString) throw new Error("DATABASE_URL missing");
   if (!globalForDb.pgPool) {
     const local = /@(localhost|127\.0\.0\.1)[:/]/.test(connectionString);
     globalForDb.pgPool = new Pool({
@@ -25,7 +25,7 @@ function pool() {
   return globalForDb.pgPool;
 }
 
-/** Legt Tabelle und Indizes beim ersten Zugriff an. Kein separates Migrations-Tool nötig. */
+/** Creates tables and indexes on first use. No separate migration step needed. */
 function ensureSchema() {
   if (!globalForDb.schemaReady) {
     globalForDb.schemaReady = (async () => {
@@ -58,8 +58,36 @@ function ensureSchema() {
       await p.query(`CREATE INDEX IF NOT EXISTS orders_status_idx ON orders (status)`);
       await p.query(`CREATE INDEX IF NOT EXISTS orders_expires_idx ON orders (expires_at)`);
       await p.query(`CREATE INDEX IF NOT EXISTS orders_email_idx ON orders (lower(email))`);
+      // Admin security: server-side sessions, sign-in/audit log, settings (2FA key, stored encrypted)
+      await p.query(`
+        CREATE TABLE IF NOT EXISTS admin_sessions (
+          token_hash  TEXT PRIMARY KEY,
+          created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+          last_seen   TIMESTAMPTZ NOT NULL DEFAULT now(),
+          expires_at  TIMESTAMPTZ NOT NULL,
+          cred        TEXT NOT NULL,
+          ip          TEXT,
+          user_agent  TEXT
+        )`);
+      await p.query(`
+        CREATE TABLE IF NOT EXISTS admin_events (
+          id          BIGSERIAL PRIMARY KEY,
+          at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+          event       TEXT NOT NULL,
+          ip          TEXT,
+          user_agent  TEXT,
+          detail      TEXT
+        )`);
+      await p.query(`CREATE INDEX IF NOT EXISTS admin_events_at_idx ON admin_events (at DESC)`);
+      await p.query(`CREATE INDEX IF NOT EXISTS admin_events_ip_idx ON admin_events (ip, at DESC)`);
+      await p.query(`
+        CREATE TABLE IF NOT EXISTS admin_settings (
+          key         TEXT PRIMARY KEY,
+          value       TEXT NOT NULL,
+          updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+        )`);
     })().catch((e) => {
-      globalForDb.schemaReady = undefined; // beim nächsten Aufruf erneut versuchen
+      globalForDb.schemaReady = undefined; // retry on next call
       throw e;
     });
   }

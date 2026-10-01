@@ -34,7 +34,6 @@ export default async function OrderDetail({ params }: Props) {
   if (!o) notFound();
   const others = await getCustomerOrders(o.email, o.id);
   const price = fmtCents(o.price_cents);
-  // Customer messages stay German: German price format and the German package name stored with the order
   const priceText = fmtCents(o.price_cents);
 
   const wa = {
@@ -96,7 +95,7 @@ export default async function OrderDetail({ params }: Props) {
             {!o.phone && <span className="muted">No WhatsApp number given. Reply in the customer&apos;s WhatsApp chat.</span>}
           </div>
           <p className="muted" style={{ margin: "0.6rem 0 0", fontSize: "0.8125rem" }}>
-            WhatsApp templates are written in German for the customer.
+            WhatsApp messages are in English and signed by the support team, never with your name.
           </p>
         </section>
 

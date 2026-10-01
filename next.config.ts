@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
-  // Eine URL-Variante pro Seite: /preise statt /preise/ (verhindert Duplicate Content)
+  // One URL per page: /pricing, never /pricing/ (avoids duplicate content)
   trailingSlash: false,
   images: { formats: ["image/avif", "image/webp"] },
   // Old German admin URLs keep working
@@ -24,10 +24,21 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     const noindex = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
+    // Admin: never cached by browsers or proxies, never framed (clickjacking), no referrer leaks
+    const adminHeaders = [
+      ...noindex,
+      { key: "Cache-Control", value: "no-store, max-age=0" },
+      { key: "X-Frame-Options", value: "DENY" },
+      {
+        key: "Content-Security-Policy",
+        value: "frame-ancestors 'none'; form-action 'self'; base-uri 'self'; object-src 'none'",
+      },
+      { key: "Referrer-Policy", value: "no-referrer" },
+    ];
     return [
       { source: "/:path*", headers: securityHeaders },
-      { source: "/admin/:path*", headers: noindex },
-      { source: "/admin", headers: noindex },
+      { source: "/admin/:path*", headers: adminHeaders },
+      { source: "/admin", headers: adminHeaders },
       { source: "/api/:path*", headers: noindex },
     ];
   },

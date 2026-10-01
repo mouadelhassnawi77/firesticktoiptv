@@ -47,31 +47,37 @@ never from the browser.
 
 ## Admin dashboard (`/admin`)
 
-The admin UI is in **English** (the public site stays German; WhatsApp templates to customers stay German).
+The admin UI is in **English**. WhatsApp messages to customers are in English and signed as the support team.
 
-- **Period switch:** Today, 7 days, 30 days, 12 months, 2 years (Berlin time)
-- **KPIs per period:** revenue with change vs. previous period, paid orders, orders received, average order value,
-  closing rate; plus open payments (count and €) and active subscriptions
-- **Chart:** revenue per hour/day/month (bars) and orders received (dots), hover for details
-- **Breakdowns:** revenue by package, most ordered devices, payment methods
-- **Order tabs:** Pending, On hold, Paid, All, each with counts
-- **Row actions:** WhatsApp button opens the chat with that customer, one-click "Paid", status dropdown that saves on change
-- **Renewals:** subscriptions expiring in 7 days with a WhatsApp renewal message
-- **Orders page** (`/admin/orders`): all statuses with counts, search, device filter, paging; order detail with notes, expiry, templates, delete
+- **Sidebar:** Dashboard, Orders (with a count of orders awaiting payment), Customers, Analytics, Security; search bar on top
+- **Dashboard:** revenue and orders per period (US Eastern time), chart, breakdowns, order tabs, renewals due in 7 days
+- **Orders** (`/admin/orders`): all statuses with counts, search, device filter, paging; order detail with notes, expiry, templates, delete
+- **Customers** (`/admin/customers`): one row per email with orders, amount spent, subscription state and a WhatsApp "Win back" button
+- **Security** (`/admin/security`): protection overview, 2FA setup, signed-in devices, activity log
 - **CSV export** for Excel
 
 Status flow: Pending → On hold (payment reported, check it; crypto orders with TXID land here
-automatically) → Paid (counts as revenue) → Active (starts 3/6/12 months or 24 h) → Expired (automatic).
-The WhatsApp number is required in the order popup so every order can be answered from the dashboard.
+automatically) → Paid (counts as revenue) → Active (starts the plan) → Expired (automatic).
+
+### Admin security
+
+1. **Username + password** only in Vercel environment variables (`ADMIN_USERNAME`, `ADMIN_PASSWORD`). Never in the code or the database.
+2. **2FA** with Google Authenticator, Microsoft Authenticator or Authy. Turn it on in Admin → Security.
+3. **Brute-force lock:** 5 failed sign-ins from one IP lock that IP for 15 minutes. Errors never say which field was wrong.
+4. **Sessions** live in the database: signed out after 12 hours without activity, 7 days at most, can be ended per device.
+5. **Activity log:** every sign-in, failed attempt, lock and sign-out with IP, place and device.
+6. **Headers:** admin pages are never cached, never framed and never indexed.
+
+Lost your phone? Change `ADMIN_PASSWORD` in Vercel and redeploy. That resets 2FA and signs out every device.
 
 ### Setup on Vercel (once)
 
-1. **Database:** Vercel → Storage → Marketplace → **Neon** → create (region **Frankfurt / eu-central-1**) → connect to this project.
-   This sets `DATABASE_URL`. The `orders` table is created automatically on first use.
-2. **Password:** Settings → Environment Variables → `ADMIN_PASSWORD` (long, random), Production.
-3. **Redeploy** once. Then open `/admin`.
+1. **Database:** Vercel → Storage → Marketplace → **Neon** → connect to this project. This sets `DATABASE_URL`.
+   All tables are created automatically on first use.
+2. **Sign-in:** Settings → Environment Variables → add `ADMIN_USERNAME` and `ADMIN_PASSWORD` (long, random), Production only.
+3. **Redeploy** once. Then open `/admin`, sign in and turn on 2FA under Security.
 
-Changing `ADMIN_PASSWORD` logs out all sessions. Locally: run any Postgres and put `DATABASE_URL` + `ADMIN_PASSWORD` in `.env.local`.
+Locally: run any Postgres and put `DATABASE_URL`, `ADMIN_USERNAME` and `ADMIN_PASSWORD` in `.env.local`.
 
 ## Google Analytics (`/admin/analytics`, like MonsterInsights)
 
@@ -139,7 +145,7 @@ This prevents Google from indexing duplicates on `*.vercel.app`. Locally (no `VE
 ```
 src/
   app/(site)/     Public pages (own layout with header, footer, order popup)
-  app/admin/      Admin dashboard (login, overview, orders, CSV export)
+  app/admin/      Admin dashboard (sign-in, overview, orders, customers, security, CSV export)
   app/api/        Order API (save order, report crypto payment)
   app/            Root layout, sitemap.ts, robots.ts, manifest.ts, OG image
   components/     Header, Footer, EPG hero, pricing rows, FAQ, breadcrumbs, JSON-LD

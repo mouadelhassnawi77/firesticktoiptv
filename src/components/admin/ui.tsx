@@ -19,7 +19,7 @@ export const fmtMoney = (value: number) => money.format(value);
 export const fmtMoneyShort = (value: number) => moneyShort.format(value);
 export const fmtNum = (value: number, digits = 0) => value.toLocaleString("en-US", { maximumFractionDigits: digits });
 
-/** Labels come from the shop config; older ids from the German version still resolve. */
+/** Labels come from the shop config; ids from the first version of the shop still resolve. */
 const LEGACY_PRODUCTS: Record<string, string> = {
   "test-24h": "24h trial (old)",
   "3-monate": "3 months (old)",
@@ -75,6 +75,8 @@ export const templates = {
     `Hi ${name},\n\nthis is ${site.supportName}. Thanks for your order ${id} (${product}, ${price}). Here is your payment link:\n\n[insert link]${SIGNATURE}`,
   access: (name: string, id: string) =>
     `Hi ${name},\n\nthis is ${site.supportName}. Your order ${id} is active. Here are your login details:\n\nServer: \nUsername: \nPassword: \n\nSetup guide: ${setupUrl}\nFor smooth streaming use at least ${site.minSpeedMbps} Mbps.${SIGNATURE}`,
+  winback: (name: string) =>
+    `Hi ${name},\n\nthis is ${site.supportName}. Your IPTV subscription has ended. Want all your channels back? Reply here and we'll reactivate you today, or pick a plan: ${renewUrl}${SIGNATURE}`,
   renewal: (name: string, expires: string) =>
     `Hi ${name},\n\nthis is ${site.supportName}. Your IPTV subscription ends on ${expires}. Want to renew? The 12-month plan is the best value: ${renewUrl}${SIGNATURE}`,
 };
