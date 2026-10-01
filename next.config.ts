@@ -22,6 +22,15 @@ const nextConfig: NextConfig = {
       { source: "/admin/bestellungen/:id", destination: "/admin/orders/:id", permanent: true },
     ];
   },
+  // URLs that match no page or file go to the redirect / 404 monitor (Admin → SEO).
+  // "fallback" runs only after every page, file and dynamic route has been checked.
+  async rewrites() {
+    return {
+      beforeFiles: [],
+      afterFiles: [],
+      fallback: [{ source: "/:path*", destination: "/missing-url?__p=:path*" }],
+    };
+  },
   async headers() {
     const noindex = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
     // Admin: never cached by browsers or proxies, never framed (clickjacking), no referrer leaks

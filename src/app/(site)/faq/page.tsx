@@ -1,19 +1,16 @@
-import type { Metadata } from "next";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import FaqList from "@/components/FaqList";
 import CtaBand from "@/components/CtaBand";
 import JsonLd from "@/components/JsonLd";
 import { faqs } from "@/lib/faqs";
 import { site, routes, whatsappLink } from "@/lib/site";
-import { pageMetadata, faqSchema } from "@/lib/seo";
+import { faqSchema } from "@/lib/seo";
+import { seoMetadata } from "@/lib/seo-meta";
 
 const path = routes.faq.href;
 
-export const metadata: Metadata = pageMetadata({
-  title: "IPTV FAQ: Plans, Devices, Setup & Refunds",
-  description: `Answers about ${site.name}: how IPTV works, the free trial, prices, Firestick setup, internet speed, devices and refunds.`,
-  path,
-});
+// Title, description and focus keyword: lib/seo-pages.ts, editable in Admin → SEO
+export const generateMetadata = seoMetadata("faq");
 
 export default function FaqPage() {
   return (

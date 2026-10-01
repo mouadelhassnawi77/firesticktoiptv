@@ -1,17 +1,12 @@
-import type { Metadata } from "next";
 import LegalPage from "@/components/LegalPage";
 import PageLink from "@/components/PageLink";
 import { site, routes, whatsappLink } from "@/lib/site";
-import { pageMetadata } from "@/lib/seo";
+import { seoMetadata } from "@/lib/seo-meta";
 
 const path = routes.refund.href;
 
-export const metadata: Metadata = pageMetadata({
-  title: "Refund Policy",
-  description: `${site.refundDays}-day refund on every ${site.name} subscription: how it works and how to ask.`,
-  path,
-  noindex: true,
-});
+// Title, description and focus keyword: lib/seo-pages.ts, editable in Admin → SEO
+export const generateMetadata = seoMetadata("refund");
 
 export default function RefundPolicyPage() {
   return (

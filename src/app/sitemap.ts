@@ -1,9 +1,11 @@
 import type { MetadataRoute } from "next";
 import { absoluteUrl, routes } from "@/lib/site";
+import { indexablePaths } from "@/lib/seo-meta";
 
 /**
- * Only live, indexable pages (see routes in lib/site.ts). A page enters the sitemap
- * the moment it is flipped to live: true. Legal pages and checkout stay out on purpose.
+ * Only live, indexable pages. A page enters the sitemap the moment it is flipped to live: true
+ * (lib/site.ts) and leaves it when it is set to noindex (code default or Admin → SEO).
+ * Legal pages are noindex by default, checkout is never listed.
  */
 const priority: Partial<Record<keyof typeof routes, number>> = {
   home: 1,
@@ -17,11 +19,11 @@ const priority: Partial<Record<keyof typeof routes, number>> = {
   about: 0.4,
   contact: 0.4,
 };
-const excluded = new Set(["terms", "privacy", "refund", "dmca"]);
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const indexable = await indexablePaths();
   return (Object.keys(routes) as (keyof typeof routes)[])
-    .filter((k) => routes[k].live && !excluded.has(k))
+    .filter((k) => routes[k].live && indexable.get(routes[k].href) !== false)
     .map((k) => ({
       url: absoluteUrl(routes[k].href),
       changeFrequency: k === "home" ? ("weekly" as const) : ("monthly" as const),

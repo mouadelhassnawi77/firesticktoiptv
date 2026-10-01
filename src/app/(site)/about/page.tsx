@@ -1,18 +1,14 @@
-import type { Metadata } from "next";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import CtaBand from "@/components/CtaBand";
 import PageLink from "@/components/PageLink";
 import { site, routes } from "@/lib/site";
 import { trial } from "@/lib/shop";
-import { pageMetadata } from "@/lib/seo";
+import { seoMetadata } from "@/lib/seo-meta";
 
 const path = routes.about.href;
 
-export const metadata: Metadata = pageMetadata({
-  title: "About Us",
-  description: `Who we are and how ${site.name} works: a US-focused IPTV service with a free trial, WhatsApp support and a ${site.refundDays}-day refund.`,
-  path,
-});
+// Title, description and focus keyword: lib/seo-pages.ts, editable in Admin → SEO
+export const generateMetadata = seoMetadata("about");
 
 const promises = [
   { title: "Try before you pay", text: `A free ${trial.hours}-hour trial with the full lineup, no card needed.` },

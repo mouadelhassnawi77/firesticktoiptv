@@ -1,18 +1,13 @@
-import type { Metadata } from "next";
 import LegalPage from "@/components/LegalPage";
 import PageLink from "@/components/PageLink";
 import { site, routes } from "@/lib/site";
-import { pageMetadata } from "@/lib/seo";
+import { seoMetadata } from "@/lib/seo-meta";
 
 const path = routes.dmca.href;
 const mailto = `mailto:${site.dmcaEmail}?subject=${encodeURIComponent("DMCA Notice")}`;
 
-export const metadata: Metadata = pageMetadata({
-  title: "DMCA Copyright Policy",
-  description: `How to report copyright infringement to ${site.name}: DMCA notice requirements, review process and counter-notification.`,
-  path,
-  noindex: true,
-});
+// Title, description and focus keyword: lib/seo-pages.ts, editable in Admin → SEO
+export const generateMetadata = seoMetadata("dmca");
 
 const sections = [
   { id: "policy", label: "Copyright policy" },

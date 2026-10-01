@@ -1,16 +1,12 @@
-import type { Metadata } from "next";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PageLink from "@/components/PageLink";
 import { site, routes, whatsappLink } from "@/lib/site";
-import { pageMetadata } from "@/lib/seo";
+import { seoMetadata } from "@/lib/seo-meta";
 
 const path = routes.contact.href;
 
-export const metadata: Metadata = pageMetadata({
-  title: "Contact Us",
-  description: `Contact ${site.name} on WhatsApp or by email for orders, free trials, setup help and support.`,
-  path,
-});
+// Title, description and focus keyword: lib/seo-pages.ts, editable in Admin → SEO
+export const generateMetadata = seoMetadata("contact");
 
 export default function ContactPage() {
   return (

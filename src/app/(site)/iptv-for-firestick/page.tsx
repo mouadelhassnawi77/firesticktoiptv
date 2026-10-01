@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import FaqList from "@/components/FaqList";
@@ -9,7 +8,8 @@ import OrderButton from "@/components/order/OrderButton";
 import type { Faq } from "@/lib/faqs";
 import { site, formatPrice, routes } from "@/lib/site";
 import { trial, lowestMonthly, plans } from "@/lib/shop";
-import { pageMetadata, faqSchema, productSchema } from "@/lib/seo";
+import { faqSchema, productSchema } from "@/lib/seo";
+import { seoMetadata } from "@/lib/seo-meta";
 
 /*
  * Silo pillar (P04) – Firestick silo. Links DOWN to every Firestick guide, UP to home, ACROSS to trial/pricing.
@@ -24,11 +24,8 @@ import { pageMetadata, faqSchema, productSchema } from "@/lib/seo";
 const path = routes.firestick.href;
 const FIRESTICK = "fire-tv-stick";
 
-export const metadata: Metadata = pageMetadata({
-  title: "IPTV for Firestick: Best IPTV Service for Fire TV",
-  description: `IPTV for Firestick with ${site.channelCount} US channels, live sports & movies in HD/4K. Works on every Fire TV Stick. Setup in 10 minutes, free ${trial.hours}h trial.`,
-  path,
-});
+// Title, description and focus keyword: lib/seo-pages.ts, editable in Admin → SEO
+export const generateMetadata = seoMetadata("firestick");
 
 const models = [
   { name: "Fire TV Stick 4K Max", note: "Best choice. Fastest processor and Wi-Fi 6E, smooth in 4K." },

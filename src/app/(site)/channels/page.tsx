@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import CtaBand from "@/components/CtaBand";
@@ -7,7 +6,7 @@ import OrderButton from "@/components/order/OrderButton";
 import { channelGroups } from "@/lib/channels";
 import { site, routes, whatsappLink } from "@/lib/site";
 import { trial } from "@/lib/shop";
-import { pageMetadata } from "@/lib/seo";
+import { seoMetadata } from "@/lib/seo-meta";
 
 /*
  * Keyword owner (P11): primary "iptv channels". Do not target "4k iptv" (→ /4k-iptv) or "iptv service" (→ /).
@@ -15,11 +14,8 @@ import { pageMetadata } from "@/lib/seo";
 
 const path = routes.channels.href;
 
-export const metadata: Metadata = pageMetadata({
-  title: "IPTV Channels List USA: Sports, News & Movies",
-  description: `Browse our IPTV channels: ${site.channelCount} live channels: sports, local networks, news, movies, kids, Latino and international.`,
-  path,
-});
+// Title, description and focus keyword: lib/seo-pages.ts, editable in Admin → SEO
+export const generateMetadata = seoMetadata("channels");
 
 export default function ChannelsPage() {
   return (

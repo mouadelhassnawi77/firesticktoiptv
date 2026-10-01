@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import FaqList from "@/components/FaqList";
@@ -9,7 +8,9 @@ import OrderButton from "@/components/order/OrderButton";
 import type { Faq } from "@/lib/faqs";
 import { site, formatPrice, routes } from "@/lib/site";
 import { trial, plans, lowestMonthly } from "@/lib/shop";
-import { pageMetadata, singleProductSchema, faqSchema } from "@/lib/seo";
+import { singleProductSchema, faqSchema } from "@/lib/seo";
+import { seoMetadata } from "@/lib/seo-meta";
+import { seoPages } from "@/lib/seo-pages";
 
 /*
  * Keyword owner (silo plan, P02):
@@ -21,10 +22,9 @@ import { pageMetadata, singleProductSchema, faqSchema } from "@/lib/seo";
  */
 
 const path = routes.freeTrial.href;
-const title = `IPTV Free Trial (${trial.hours} Hours, No Card)`;
-const description = `Get a free ${trial.hours}-hour IPTV trial with ${site.channelCount} channels incl. live sports. Works on Firestick & Smart TV. Login on WhatsApp in minutes.`;
-
-export const metadata: Metadata = pageMetadata({ title, description, path });
+// Title, description and focus keyword: lib/seo-pages.ts, editable in Admin → SEO
+export const generateMetadata = seoMetadata("freeTrial");
+const { description } = seoPages.freeTrial;
 
 const included = [
   { title: "The full channel list", text: `All ${site.channelCount} channels, the same lineup paying customers get. No cut-down trial package.` },

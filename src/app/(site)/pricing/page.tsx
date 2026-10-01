@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Pricing from "@/components/Pricing";
 import FaqList from "@/components/FaqList";
@@ -8,7 +7,8 @@ import PageLink from "@/components/PageLink";
 import type { Faq } from "@/lib/faqs";
 import { site, formatPrice, routes } from "@/lib/site";
 import { plans, trial, popularPlan, monthly, savingsPercent, lowestMonthly } from "@/lib/shop";
-import { pageMetadata, productSchema, faqSchema } from "@/lib/seo";
+import { productSchema, faqSchema } from "@/lib/seo";
+import { seoMetadata } from "@/lib/seo-meta";
 
 /*
  * Keyword owner (silo plan, P03):
@@ -21,11 +21,8 @@ const path = routes.pricing.href;
 const first = plans[0];
 const last = plans[plans.length - 1];
 
-export const metadata: Metadata = pageMetadata({
-  title: `IPTV Subscription Plans: ${formatPrice(first.price)}/Month or ${formatPrice(last.price)}/Year`,
-  description: `Subscribe to IPTV every month for ${formatPrice(first.price)} or save with 3, 6 or 12 months (${formatPrice(lowestMonthly)}/mo). ${site.channelCount} channels, 4K, no auto-renewal, ${site.refundDays}-day refund.`,
-  path,
-});
+// Title, description and focus keyword: lib/seo-pages.ts, editable in Admin → SEO
+export const generateMetadata = seoMetadata("pricing");
 
 const pricingFaqs: Faq[] = [
   {

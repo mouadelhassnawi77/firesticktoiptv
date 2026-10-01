@@ -18,6 +18,12 @@ const icons = {
     </>
   ),
   analytics: <path d="M3 3v18h18M7 15l4-4 3 3 6-6" />,
+  seo: (
+    <>
+      <circle cx="10.5" cy="10.5" r="6.5" />
+      <path d="m21 21-5.5-5.5M7.5 12l2-2 1.5 1.5 2.5-3" />
+    </>
+  ),
   security: (
     <>
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -51,6 +57,7 @@ const items: { href: string; label: string; icon: IconName; badge?: "pending" | 
   { href: "/admin/orders", label: "Orders", icon: "orders", badge: "pending" },
   { href: "/admin/customers", label: "Customers", icon: "customers" },
   { href: "/admin/analytics", label: "Analytics", icon: "analytics" },
+  { href: "/admin/seo", label: "SEO", icon: "seo" },
   { href: "/admin/security", label: "Security", icon: "security", badge: "security" },
 ];
 

@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import Epg from "@/components/Epg";
 import Pricing from "@/components/Pricing";
@@ -10,7 +9,8 @@ import OrderButton from "@/components/order/OrderButton";
 import { faqs } from "@/lib/faqs";
 import { site, formatPrice } from "@/lib/site";
 import { lowestMonthly, trial, plans } from "@/lib/shop";
-import { pageMetadata, productSchema, faqSchema } from "@/lib/seo";
+import { productSchema, faqSchema } from "@/lib/seo";
+import { seoMetadata } from "@/lib/seo-meta";
 
 /*
  * Homepage – keyword owner (see the silo plan):
@@ -22,12 +22,8 @@ import { pageMetadata, productSchema, faqSchema } from "@/lib/seo";
 
 const homeFaqs = faqs.slice(0, 6);
 
-export const metadata: Metadata = pageMetadata({
-  title: `IPTV Service USA | ${site.channelCount} Channels & Free Trial`,
-  description: `IPTV service for the USA: ${site.channelCount} live channels, sports & movies in HD/4K on Firestick & Smart TV. From ${formatPrice(lowestMonthly)}/mo. Free ${trial.hours}h trial.`,
-  path: "/",
-  absoluteTitle: true,
-});
+// Title, description and focus keyword: lib/seo-pages.ts, editable in Admin → SEO
+export const generateMetadata = seoMetadata("home");
 
 const features = [
   {

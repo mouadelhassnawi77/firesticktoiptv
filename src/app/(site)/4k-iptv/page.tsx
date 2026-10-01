@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import FaqList from "@/components/FaqList";
@@ -9,7 +8,8 @@ import OrderButton from "@/components/order/OrderButton";
 import type { Faq } from "@/lib/faqs";
 import { site, formatPrice, routes } from "@/lib/site";
 import { trial, lowestMonthly } from "@/lib/shop";
-import { pageMetadata, faqSchema } from "@/lib/seo";
+import { faqSchema } from "@/lib/seo";
+import { seoMetadata } from "@/lib/seo-meta";
 
 /*
  * Keyword owner (P12): primary "4k iptv", secondary "4k live iptv".
@@ -19,11 +19,8 @@ import { pageMetadata, faqSchema } from "@/lib/seo";
 const path = routes.fourK.href;
 const fourKSpeed = Math.max(site.minSpeedMbps, 25);
 
-export const metadata: Metadata = pageMetadata({
-  title: "4K IPTV: Live Sports & Movies in Ultra HD",
-  description: `4K IPTV for the USA: live sports and movies in Ultra HD on Firestick 4K, Smart TV and Apple TV. What you need, which devices work, free ${trial.hours}h trial.`,
-  path,
-});
+// Title, description and focus keyword: lib/seo-pages.ts, editable in Admin → SEO
+export const generateMetadata = seoMetadata("fourK");
 
 const needs = [
   { title: "A 4K TV", text: "Any 4K (UHD) TV. On an HD TV the picture is shown in HD." },
