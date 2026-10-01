@@ -49,6 +49,8 @@ const nextConfig: NextConfig = {
       { source: "/admin/:path*", headers: adminHeaders },
       { source: "/admin", headers: adminHeaders },
       { source: "/api/:path*", headers: noindex },
+      // The sitemap is read by Google but must never show up as a search result itself (Rank Math/Yoast do the same)
+      { source: "/sitemap.xml", headers: [{ key: "X-Robots-Tag", value: "noindex" }] },
     ];
   },
 };

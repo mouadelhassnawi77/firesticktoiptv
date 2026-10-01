@@ -1,8 +1,8 @@
 import "server-only";
 import type { Metadata } from "next";
-import { isIndexable } from "./site";
+import { absoluteUrl, isIndexable } from "./site";
 import { pageMetadata } from "./seo";
-import { effectiveSeo, seoPages, type SeoKey } from "./seo-pages";
+import { effectiveSeo, seoPageList, seoPages, type SeoKey } from "./seo-pages";
 import { getOverridesSafe } from "./seo-store";
 
 /**
@@ -34,10 +34,33 @@ export function seoMetadata(key: SeoKey) {
   };
 }
 
-/** For the sitemap: is this path indexable after overrides? */
-export async function indexablePaths() {
+export type SitemapEntry = { path: string; lastModified: Date };
+
+/** "/pricing", "https://www.x.com/pricing/" … → one comparable absolute URL */
+function toAbsolute(url: string) {
+  const abs = url.startsWith("/") ? absoluteUrl(url) : url;
+  return abs.replace(/\/+$/, "");
+}
+
+/**
+ * Exactly the URLs Google should index, nothing else:
+ *  - live pages only (lib/site.ts → live: true)
+ *  - not noindex (code default or Admin → SEO)
+ *  - canonical points to the page itself (a page canonicalised elsewhere must not be in the sitemap)
+ * lastmod = the later of the content date in lib/seo-pages.ts and the last real SEO edit in the admin.
+ */
+export async function sitemapEntries(): Promise<SitemapEntry[]> {
   const overrides = await getOverridesSafe();
-  const out = new Map<string, boolean>();
-  for (const page of Object.values(seoPages)) out.set(page.path, effectiveSeo(page, overrides.get(page.path)).index);
-  return out;
+  const entries: SitemapEntry[] = [];
+  for (const page of seoPageList) {
+    const override = overrides.get(page.path);
+    const seo = effectiveSeo(page, override);
+    if (!seo.index) continue;
+    if (toAbsolute(seo.canonical) !== toAbsolute(page.path)) continue;
+
+    const content = new Date(`${page.updated}T00:00:00Z`);
+    const edited = override?.updated_at ? new Date(override.updated_at) : null;
+    entries.push({ path: page.path, lastModified: edited && edited > content ? edited : content });
+  }
+  return entries;
 }

@@ -9,11 +9,15 @@ import { lowestMonthly, trial } from "./shop";
  * Domain order: 1) NEXT_PUBLIC_SITE_URL (set it in Vercel)
  * 2) production domain Vercel provides automatically  3) fallback.
  */
+/**
+ * The one canonical host. Every canonical tag, sitemap URL and robots.txt line is built from it.
+ * No fallback to VERCEL_PROJECT_PRODUCTION_URL on purpose: Vercel sets that to the *shortest* domain
+ * (firesticktoiptv.com), which 308-redirects to www – a sitemap full of redirects is a Search Console error.
+ */
+const CANONICAL_ORIGIN = "https://www.firesticktoiptv.com";
+
 function resolveSiteUrl() {
-  const fromEnv = process.env.NEXT_PUBLIC_SITE_URL;
-  const vercelProd = process.env.VERCEL_PROJECT_PRODUCTION_URL;
-  const url = fromEnv || (vercelProd ? `https://${vercelProd}` : "https://www.firesticktoiptv.com");
-  return url.replace(/\/$/, "");
+  return (process.env.NEXT_PUBLIC_SITE_URL || CANONICAL_ORIGIN).trim().replace(/\/+$/, "");
 }
 
 /**
@@ -101,6 +105,8 @@ export const routes = {
   dmca: { href: "/dmca", label: "DMCA Policy", live: true },
 } as const;
 export type RouteKey = keyof typeof routes;
+/** Keys of pages that are live: flipping a page to live: true without an SEO entry fails the build */
+export type LiveRouteKey = { [K in RouteKey]: (typeof routes)[K]["live"] extends true ? K : never }[RouteKey];
 export const liveRoutes = (keys: RouteKey[]) => keys.map((k) => routes[k]).filter((r) => r.live);
 
 export const mainNav = liveRoutes(["pricing", "firestick", "channels", "faq", "contact"]);

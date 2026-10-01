@@ -6,10 +6,16 @@
  * New page: add it to `routes` in lib/site.ts, add an entry here, and in the page file write
  *   export const generateMetadata = seoMetadata("yourKey");
  */
-import { site, formatPrice, routes, type RouteKey } from "./site";
+import { site, formatPrice, routes, type RouteKey, type LiveRouteKey } from "./site";
 import { plans, trial, lowestMonthly } from "./shop";
 
 export type SeoDefaults = {
+  /**
+   * Date the page CONTENT last changed (YYYY-MM-DD) – becomes <lastmod> in sitemap.xml.
+   * Bump it whenever you rewrite the page's text; leave it alone for design or code-only changes.
+   * Google trusts lastmod only while it stays honest, so never set it to "today" automatically.
+   */
+  updated: string;
   title: string;
   description: string;
   /** Focus keyword from the silo plan (empty = not set yet) */
@@ -26,6 +32,7 @@ const last = plans[plans.length - 1];
 
 const defaults = {
   home: {
+    updated: "2026-09-30",
     title: `IPTV Service USA | ${site.channelCount} Channels & Free Trial`,
     description: `IPTV service for the USA: ${site.channelCount} live channels, sports & movies in HD/4K on Firestick & Smart TV. From ${formatPrice(lowestMonthly)}/mo. Free ${trial.hours}h trial.`,
     keyword: "iptv service",
@@ -33,54 +40,63 @@ const defaults = {
     absoluteTitle: true,
   },
   pricing: {
+    updated: "2026-09-30",
     title: `IPTV Subscription Plans: ${formatPrice(first.price)}/Month or ${formatPrice(last.price)}/Year`,
     description: `Subscribe to IPTV every month for ${formatPrice(first.price)} or save with 3, 6 or 12 months (${formatPrice(lowestMonthly)}/mo). ${site.channelCount} channels, 4K, no auto-renewal, ${site.refundDays}-day refund.`,
     keyword: "iptv every month subscribe",
     secondary: ["subscribe iptv", "iptv smarters pro subscription", "iptv premium"],
   },
   freeTrial: {
+    updated: "2026-09-30",
     title: `IPTV Free Trial (${trial.hours} Hours, No Card)`,
     description: `Get a free ${trial.hours}-hour IPTV trial with ${site.channelCount} channels incl. live sports. Works on Firestick & Smart TV. Login on WhatsApp in minutes.`,
     keyword: "iptv free trial",
     secondary: ["free iptv for firestick", "free iptv on firestick", "iptv firestick free", "iptv free for firestick"],
   },
   firestick: {
+    updated: "2026-09-30",
     title: "IPTV for Firestick: Best IPTV Service for Fire TV",
     description: `IPTV for Firestick with ${site.channelCount} US channels, live sports & movies in HD/4K. Works on every Fire TV Stick. Setup in 10 minutes, free ${trial.hours}h trial.`,
     keyword: "iptv for firestick",
     secondary: ["best iptv service for firestick", "best iptv on firestick", "iptv providers for firestick"],
   },
   channels: {
+    updated: "2026-09-30",
     title: "IPTV Channels List USA: Sports, News & Movies",
     description: `Browse our IPTV channels: ${site.channelCount} live channels: sports, local networks, news, movies, kids, Latino and international.`,
     keyword: "iptv channels",
     secondary: ["iptv channels list"],
   },
   fourK: {
+    updated: "2026-09-30",
     title: "4K IPTV: Live Sports & Movies in Ultra HD",
     description: `4K IPTV for the USA: live sports and movies in Ultra HD on Firestick 4K, Smart TV and Apple TV. What you need, which devices work, free ${trial.hours}h trial.`,
     keyword: "4k iptv",
     secondary: ["4k live iptv"],
   },
   faq: {
+    updated: "2026-09-30",
     title: "IPTV FAQ: Plans, Devices, Setup & Refunds",
     description: `Answers about ${site.name}: how IPTV works, the free trial, prices, Firestick setup, internet speed, devices and refunds.`,
     keyword: "iptv faq",
     secondary: [],
   },
   contact: {
+    updated: "2026-09-30",
     title: "Contact Us",
     description: `Contact ${site.name} on WhatsApp or by email for orders, free trials, setup help and support.`,
     keyword: "",
     secondary: [],
   },
   about: {
+    updated: "2026-09-30",
     title: "About Us",
     description: `Who we are and how ${site.name} works: a US-focused IPTV service with a free trial, WhatsApp support and a ${site.refundDays}-day refund.`,
     keyword: "",
     secondary: [],
   },
   terms: {
+    updated: "2026-09-30",
     title: "Terms of Service",
     description: `Terms of Service for ${site.name}: plans, payments, device use, internet requirements and support.`,
     keyword: "",
@@ -88,6 +104,7 @@ const defaults = {
     noindex: true,
   },
   privacy: {
+    updated: "2026-09-30",
     title: "Privacy Policy",
     description: `How ${site.name} collects, uses and protects your personal information.`,
     keyword: "",
@@ -95,6 +112,7 @@ const defaults = {
     noindex: true,
   },
   refund: {
+    updated: "2026-09-30",
     title: "Refund Policy",
     description: `${site.refundDays}-day refund on every ${site.name} subscription: how it works and how to ask.`,
     keyword: "",
@@ -102,13 +120,14 @@ const defaults = {
     noindex: true,
   },
   dmca: {
+    updated: "2026-09-30",
     title: "DMCA Copyright Policy",
     description: `How to report copyright infringement to ${site.name}: DMCA notice requirements, review process and counter-notification.`,
     keyword: "",
     secondary: [],
     noindex: true,
   },
-} satisfies Partial<Record<RouteKey, SeoDefaults>>;
+} satisfies Partial<Record<RouteKey, SeoDefaults>> & Record<LiveRouteKey, SeoDefaults>;
 
 export type SeoKey = keyof typeof defaults;
 

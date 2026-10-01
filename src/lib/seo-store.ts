@@ -93,10 +93,22 @@ export async function saveOverride(path: string, o: OverrideInput, score: number
   await q(
     `INSERT INTO seo_pages (path, title, description, keyword, secondary, canonical, robots_index, robots_follow,
                             absolute_title, og_title, og_description, score, analyzed_at, updated_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12, now(), now())
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12, now(),
+       -- updated_at feeds <lastmod> in the sitemap: set it only when a field Google sees is overridden
+       CASE WHEN COALESCE($2::text, $3::text, $6::text, $10::text, $11::text) IS NOT NULL
+              OR $7::boolean IS NOT NULL OR $8::boolean IS NOT NULL OR $9::boolean IS NOT NULL
+            THEN now() END)
      ON CONFLICT (path) DO UPDATE SET
        title=$2, description=$3, keyword=$4, secondary=$5, canonical=$6, robots_index=$7, robots_follow=$8,
-       absolute_title=$9, og_title=$10, og_description=$11, score=$12, analyzed_at=now(), updated_at=now()`,
+       absolute_title=$9, og_title=$10, og_description=$11, score=$12, analyzed_at=now(),
+       -- Saving without a visible change (or only changing the focus keyword) keeps the old lastmod honest
+       updated_at = CASE
+         WHEN (seo_pages.title, seo_pages.description, seo_pages.canonical, seo_pages.robots_index,
+               seo_pages.robots_follow, seo_pages.absolute_title, seo_pages.og_title, seo_pages.og_description)
+              IS DISTINCT FROM
+              (EXCLUDED.title, EXCLUDED.description, EXCLUDED.canonical, EXCLUDED.robots_index,
+               EXCLUDED.robots_follow, EXCLUDED.absolute_title, EXCLUDED.og_title, EXCLUDED.og_description)
+         THEN now() ELSE seo_pages.updated_at END`,
     [
       path,
       o.title,
